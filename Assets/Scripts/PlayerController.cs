@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using System;
+//using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,8 +21,13 @@ public class PlayerController : MonoBehaviour
 
     [Header("Interact")]
     [SerializeField] private float interactDistance = 3f;
+    [SerializeField] private float grabberDistance = 1.5f;
+    [SerializeField] private float grabberYOffset = -0.3f;
     public GameObject pickedItem = null;
     public event Action<Transform> Interacted;
+
+    [Header("Misc")]
+    [SerializeField] private Transform startingPoint;
 
     private Rigidbody playerRigidbody;
     private Transform playerTransform;
@@ -43,7 +49,14 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        //TODO: add a Spawn function that sets rotation to 0? avoids rotation changing after clicking play
+        // Spawn on Starting point
+        if (startingPoint != null )
+        {
+            playerRigidbody.isKinematic = true;
+            playerRigidbody.position = startingPoint.position;
+            playerRigidbody.rotation = startingPoint.rotation;
+            playerRigidbody.isKinematic = false;
+        }
     }
 
 
@@ -57,7 +70,14 @@ public class PlayerController : MonoBehaviour
 
         // Interact with objects using Raycast
         bool interactKey = Input.GetKeyDown(KeyCode.E);
-        InteractWithObject(interactKey);
+        InteractWithObject(interactKey); //TODO: rewrite? put if outside of function for clarity
+
+        // Move Grabber
+        Vector3 newGrabberPosition = cameraTransform.TransformDirection(Vector3.forward + new Vector3(0, grabberYOffset, 0));
+        newGrabberPosition *= grabberDistance;
+        newGrabberPosition += cameraTransform.position;
+        grabberTransform.position = newGrabberPosition;
+        grabberTransform.rotation = cameraTransform.rotation;
     }
 
     void FixedUpdate()
@@ -74,9 +94,8 @@ public class PlayerController : MonoBehaviour
         pitch = Mathf.Clamp(pitch, minXRotation, maxXRotation);
         yaw += mouseX * mouseSensitivity * Time.deltaTime;
 
-        cameraTransform.localRotation = Quaternion.Euler(pitch, 0, 0); //FIX: this rotation stutters when moving: needs to be interpolated
-        playerTransform.localRotation = Quaternion.Euler(0, yaw, 0);
-        grabberTransform.localRotation = cameraTransform.localRotation;
+        cameraTransform.localRotation = Quaternion.Euler(pitch, 0, 0); 
+        playerTransform.localRotation = Quaternion.Euler(0, yaw, 0); //FIX: this rotation stutters when moving: needs to be interpolated
     }
 
     private void MovePlayer(float horizontalMovement, float verticalMovement)
@@ -98,7 +117,7 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
         if (interactKey && Physics.Raycast(interactRay, out hit, interactDistance, layerMask, QueryTriggerInteraction.Ignore))
         {
-            if (hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here
+            if (hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
             {
                 Interact();
             }

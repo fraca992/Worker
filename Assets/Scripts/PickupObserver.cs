@@ -9,6 +9,7 @@ public class PickupObserver : MonoBehaviour
 
     private Rigidbody rb;
     private Transform t;
+    private Transform grabberTransform = null;
 
     // Start is called before the first frame update
     void Start()
@@ -24,13 +25,19 @@ public class PickupObserver : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (grabberTransform == null) return;
+
+        rb.MovePosition(grabberTransform.position);
+        rb.MoveRotation(grabberTransform.rotation);
+    }
+
     public void OnInteraction(Transform playerGrabber)
     {
-        Debug.Log("picked!");
-
-        t.SetParent(playerGrabber, true);
-        rb.MovePosition(Vector3.zero);
-        rb.MoveRotation(Quaternion.identity);
+        grabberTransform = playerGrabber;
+        grabberTransform.GetComponentInParent<PlayerController>().pickedItem = this.gameObject;
+        rb.useGravity = false;
         rb.isKinematic = true;
     }
 
