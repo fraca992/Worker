@@ -67,21 +67,17 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // Player & Camera rotation
+        // sotring new direction in the Direction object
         float mouseX = Input.GetAxisRaw("Mouse X");
         float mouseY = Input.GetAxisRaw("Mouse Y");
-        LookDirection(mouseX, mouseY);
+        updateDirection(mouseX, mouseY);
 
         // Interact with objects using Raycast
         bool interactKey = Input.GetKeyDown(KeyCode.E);
-        InteractWithObject(interactKey); //TODO: rewrite? put if outside of function for clarity
+        InteractWithObject(interactKey);
 
         // Move Grabber
-        Vector3 newGrabberPosition = tDirection.TransformDirection(Vector3.forward + new Vector3(0, grabberYOffset, 0));
-        newGrabberPosition.Normalize();
-        newGrabberPosition *= grabberDistance;
-        tGrabber.localPosition = newGrabberPosition;
-        tGrabber.rotation = tDirection.rotation;
+        MoveGrabber();
     }
 
     void FixedUpdate()
@@ -89,26 +85,22 @@ public class PlayerController : MonoBehaviour
         // Player Movement
         float horizontalMovement = Input.GetAxisRaw("Horizontal"); // using raw input to make movement snappier
         float verticalMovement = Input.GetAxisRaw("Vertical");
-        //float mouseX = Input.GetAxisRaw("Mouse X");
         MovePlayer(horizontalMovement, verticalMovement);
     }
 
     private void LateUpdate()
     {
-        Vector3 newPosition = new Vector3(tPlayer.position.x, tPlayer.position.y, tPlayer.position.z);
-        newPosition.y += cameraYOffset;
-        tCamera.position = newPosition;
-        tCamera.rotation = tDirection.rotation;
+        // Camera Movement
+        MoveCamera();
     }
 
-    private void LookDirection(float mouseX, float mouseY)
+    private void updateDirection(float mouseX, float mouseY)
     {
         pitch -= mouseY * mouseYSensitivity * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, minXRotation, maxXRotation);
         yaw += mouseX * mouseXSensitivity * Time.deltaTime;
 
-        tDirection.rotation = Quaternion.Euler(pitch, yaw, 0); //2 test: Time.DeltaTime & Rotate
-        //tPlayer.rotation = Quaternion.Euler(0, yaw, 0);
+        tDirection.rotation = Quaternion.Euler(pitch, yaw, 0);
     }
 
     private void MovePlayer(float horizontalMovement, float verticalMovement)
@@ -119,7 +111,23 @@ public class PlayerController : MonoBehaviour
         movement.y = rbPlayer.velocity.y; // As we're manipulating speed directly, take care not changing vertical speed
         rbPlayer.velocity = movement; // this could create weird physics interactions. If so, maybe try AddForce with ForceMode.VelocityChange, clamp to max velocity
         rbPlayer.rotation = Quaternion.Euler(0f, tDirection.rotation.y, 0f);
-        //rbPlayer.AddForce(movement, ForceMode.Force);
+    }
+
+    private void MoveCamera()
+    {
+        Vector3 newPosition = new Vector3(tPlayer.position.x, tPlayer.position.y, tPlayer.position.z);
+        newPosition.y += cameraYOffset;
+        tCamera.position = newPosition;
+        tCamera.rotation = tDirection.rotation;
+    }
+
+    private void MoveGrabber()
+    {
+        Vector3 newGrabberPosition = tDirection.TransformDirection(Vector3.forward + new Vector3(0, grabberYOffset, 0));
+        newGrabberPosition.Normalize();
+        newGrabberPosition *= grabberDistance;
+        tGrabber.localPosition = newGrabberPosition;
+        tGrabber.rotation = tDirection.rotation;
     }
 
     private void InteractWithObject(bool interactKey)
@@ -127,8 +135,8 @@ public class PlayerController : MonoBehaviour
         //Selecting Layer 6: Interactable Obects for our RayCast
         int layerMask = 1 << 6;
 
-        //we RayCast using the Direction object rather than the player to account for pitch
-        Ray interactRay = new Ray(tDirection.position, tDirection.TransformDirection(Vector3.forward));
+        //we RayCast using the Camera rather than the player to account for pitch
+        Ray interactRay = new Ray(tCamera.position, tCamera.TransformDirection(Vector3.forward));
         RaycastHit hit;
         if (interactKey && Physics.Raycast(interactRay, out hit, interactDistance, layerMask, QueryTriggerInteraction.Ignore))
         {
