@@ -25,12 +25,19 @@ public class PickupObserver : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+    //private void FixedUpdate()
+    //{
+    //    if (grabberTransform == null) return;
+
+    //    rb.MovePosition(grabberTransform.position);
+    //    rb.MoveRotation(grabberTransform.rotation);
+    //}
+    private void Update()
     {
         if (grabberTransform == null) return;
 
-        rb.MovePosition(grabberTransform.position);
-        rb.MoveRotation(grabberTransform.rotation);
+        t.position = (grabberTransform.position);
+        t.rotation = (grabberTransform.rotation);
     }
 
     public void OnInteraction(Transform playerGrabber)
