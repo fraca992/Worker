@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float grabberDistance = 1.5f;
     [SerializeField] private float grabberYOffset = -0.3f;
     public GameObject pickedItem = null;
-    public event Action<Transform> Interacted;
+    public event Action<Transform> PickedUp;
 
     [Header("Misc")]
     [SerializeField] private Transform startingPoint;
@@ -123,8 +123,8 @@ public class PlayerController : MonoBehaviour
 
     private void MoveGrabber()
     {
-        Vector3 newGrabberPosition = tDirection.TransformDirection(Vector3.forward + new Vector3(0, grabberYOffset, 0));
-        newGrabberPosition.Normalize();
+        // Grabber position is calculated from camera, player's POV
+        Vector3 newGrabberPosition = tCamera.TransformDirection(Vector3.forward + new Vector3(0, grabberYOffset, 0));
         newGrabberPosition *= grabberDistance;
         tGrabber.localPosition = newGrabberPosition;
         tGrabber.rotation = tDirection.rotation;
@@ -142,13 +142,13 @@ public class PlayerController : MonoBehaviour
         {
             if (hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
             {
-                Interact();
+                PickupInteraction();
             }
         }
     }
 
-    public void Interact()
+    public void PickupInteraction()
     {
-            Interacted?.Invoke(tGrabber);
+        PickedUp?.Invoke(tGrabber);
     }
 }
