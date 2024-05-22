@@ -792,7 +792,7 @@ GameObject:
   - component: {fileID: 1208686797}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -816,8 +816,8 @@ MonoBehaviour:
   minXRotation: -60
   maxXRotation: 60
   interactDistance: 2
-  grabberDistance: 1.2
-  grabberYOffset: -0.1
+  grabberDistance: 1.5
+  grabberYOffset: -0.5
   pickedItem: {fileID: 0}
   startingPoint: {fileID: 735277027}
 --- !u!54 &1208686798
@@ -1550,7 +1550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 1707740932}
-  DebugOptions: 0
+  DebugOptions: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

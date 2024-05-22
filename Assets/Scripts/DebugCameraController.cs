@@ -27,6 +27,8 @@ public class DebugCameraController : MonoBehaviour
         switch (DebugOptions)
         {
             case Option.Disabled:
+                playerCamera.enabled = true;
+                debugCamera.enabled = false;
                 break;
             case Option.SplitScreen:
                 playerCamera.rect = new Rect(0, 0, 0.5f, 1);
@@ -37,6 +39,8 @@ public class DebugCameraController : MonoBehaviour
                 debugCamera.enabled = true;
                 break;
             default:
+                playerCamera.enabled = true;
+                debugCamera.enabled = false;
                 break;
         }
     }

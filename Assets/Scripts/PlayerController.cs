@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using System;
+using UnityEditor;
 //using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
@@ -92,6 +93,13 @@ public class PlayerController : MonoBehaviour
     {
         // Camera Movement
         MoveCamera();
+
+        //DEBUG
+        Debug.DrawLine(tCamera.position, tCamera.position + tCamera.forward,Color.red,Time.deltaTime);
+        Debug.DrawLine(tCamera.position + tCamera.forward
+            , tCamera.position + tCamera.forward + tCamera.TransformVector(0, grabberYOffset, 0), Color.blue, Time.deltaTime);
+        Debug.DrawLine(tCamera.position
+            , tCamera.position + tCamera.forward + tCamera.TransformVector(0, grabberYOffset, 0), Color.green, Time.deltaTime);
     }
 
     private void updateDirection(float mouseX, float mouseY)
@@ -124,9 +132,10 @@ public class PlayerController : MonoBehaviour
     private void MoveGrabber()
     {
         // Grabber position is calculated from camera, player's POV
-        Vector3 newGrabberPosition = tCamera.TransformDirection(Vector3.forward + new Vector3(0, grabberYOffset, 0));
+        Vector3 newGrabberPosition = tCamera.forward;
+        newGrabberPosition += tCamera.TransformVector(0, grabberYOffset, 0);
         newGrabberPosition *= grabberDistance;
-        tGrabber.localPosition = newGrabberPosition;
+        tGrabber.position = tCamera.position + newGrabberPosition;
         tGrabber.rotation = tDirection.rotation;
     }
 

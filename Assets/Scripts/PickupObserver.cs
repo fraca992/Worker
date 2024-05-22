@@ -56,6 +56,7 @@ public class PickupObserver : MonoBehaviour
         grabberTransform.GetComponentInParent<PlayerController>().pickedItem = this.gameObject;
         rb.useGravity = false;
         rb.isKinematic = true;
+        t.GetComponent<Collider>().enabled = false;
 
 
         lerpStart = transform;
