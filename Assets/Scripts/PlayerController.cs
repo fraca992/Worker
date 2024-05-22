@@ -93,13 +93,6 @@ public class PlayerController : MonoBehaviour
     {
         // Camera Movement
         MoveCamera();
-
-        //DEBUG
-        Debug.DrawLine(tCamera.position, tCamera.position + tCamera.forward,Color.red,Time.deltaTime);
-        Debug.DrawLine(tCamera.position + tCamera.forward
-            , tCamera.position + tCamera.forward + tCamera.TransformVector(0, grabberYOffset, 0), Color.blue, Time.deltaTime);
-        Debug.DrawLine(tCamera.position
-            , tCamera.position + tCamera.forward + tCamera.TransformVector(0, grabberYOffset, 0), Color.green, Time.deltaTime);
     }
 
     private void updateDirection(float mouseX, float mouseY)
