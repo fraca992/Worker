@@ -9,35 +9,28 @@ using UnityEditor;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField]
-    private float movementSpeed = 250f;
-    [SerializeField]
-    private float mouseXSensitivity = 500f;
-    [SerializeField]
-    private float mouseYSensitivity = 500f;
-    [SerializeField]
-    private float cameraYOffset = 0.8f;
-    [SerializeField]
-    private int minXRotation = -60;
-    [SerializeField]
-    private int maxXRotation = +60;
+    [SerializeField] private float movementSpeed = 250f;
+    [SerializeField] private float mouseXSensitivity = 500f;
+    [SerializeField] private float mouseYSensitivity = 500f;
+    [SerializeField] private int minXRotation = -60;
+    [SerializeField] private int maxXRotation = +60;
     private float pitch = 0;
     private float yaw = 0;
 
     [Header("Interact")]
     [SerializeField] private float interactDistance = 3f;
     [SerializeField] private float grabberDistance = 1.5f;
-    [SerializeField] private float grabberYOffset = -0.3f;
+    [SerializeField] private float grabberYOffset = -0.11f;
     public GameObject pickedItem = null;
     public event Action<Transform> PickedUp;
 
     [Header("Misc")]
     [SerializeField] private Transform startingPoint;
+    [SerializeField] private float cameraYOffset = 0.8f;
 
     private Rigidbody rbPlayer;
     private Transform tPlayer;
-    private Transform tCamera;
-    private Transform tDirection;
+    private Transform tCameraDirection;
     private Transform tGrabber;
 
     void Start()
@@ -45,8 +38,7 @@ public class PlayerController : MonoBehaviour
         // Get References
         rbPlayer = GetComponent<Rigidbody>();
         tPlayer = GetComponent<Transform>();
-        tCamera = tPlayer.Find("Camera");
-        tDirection = tPlayer.Find("Direction");
+        tCameraDirection = tPlayer.Find("CameraDirection");
         tGrabber = tPlayer.Find("Grabber");
 
         // Apply components properties
@@ -71,7 +63,7 @@ public class PlayerController : MonoBehaviour
         // sotring new direction in the Direction object
         float mouseX = Input.GetAxisRaw("Mouse X");
         float mouseY = Input.GetAxisRaw("Mouse Y");
-        updateDirection(mouseX, mouseY);
+        UpdateDirection(mouseX, mouseY);
 
         // Interact with objects using Raycast
         bool interactKey = Input.GetKeyDown(KeyCode.E);
@@ -89,47 +81,36 @@ public class PlayerController : MonoBehaviour
         MovePlayer(horizontalMovement, verticalMovement);
     }
 
-    private void LateUpdate()
-    {
-        // Camera Movement
-        MoveCamera();
-    }
-
-    private void updateDirection(float mouseX, float mouseY)
+    private void UpdateDirection(float mouseX, float mouseY)
     {
         pitch -= mouseY * mouseYSensitivity * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, minXRotation, maxXRotation);
         yaw += mouseX * mouseXSensitivity * Time.deltaTime;
+        tCameraDirection.rotation = Quaternion.Euler(pitch, yaw, 0);
 
-        tDirection.rotation = Quaternion.Euler(pitch, yaw, 0);
+        Vector3 newPosition = tPlayer.position;
+        newPosition.y += cameraYOffset;
+        tCameraDirection.position = newPosition;
     }
 
     private void MovePlayer(float horizontalMovement, float verticalMovement)
     {
-        Vector3 movement = tDirection.forward * verticalMovement + tDirection.right * horizontalMovement;
+        Vector3 movement = tCameraDirection.forward * verticalMovement + tCameraDirection.right * horizontalMovement;
         movement.Normalize();
         movement *= movementSpeed * Time.fixedDeltaTime;
         movement.y = rbPlayer.velocity.y; // As we're manipulating speed directly, take care not changing vertical speed
-        rbPlayer.velocity = movement; // this could create weird physics interactions. If so, maybe try AddForce with ForceMode.VelocityChange, clamp to max velocity
-        rbPlayer.rotation = Quaternion.Euler(0f, tDirection.rotation.y, 0f);
-    }
-
-    private void MoveCamera()
-    {
-        Vector3 newPosition = new Vector3(tPlayer.position.x, tPlayer.position.y, tPlayer.position.z);
-        newPosition.y += cameraYOffset;
-        tCamera.position = newPosition;
-        tCamera.rotation = tDirection.rotation;
+        rbPlayer.AddForce(movement - rbPlayer.velocity,ForceMode.VelocityChange);
+        rbPlayer.rotation = Quaternion.Euler(0f, tCameraDirection.rotation.y, 0f);
     }
 
     private void MoveGrabber()
     {
         // Grabber position is calculated from camera, player's POV
-        Vector3 newGrabberPosition = tCamera.forward;
-        newGrabberPosition += tCamera.TransformVector(0, grabberYOffset, 0);
+        Vector3 newGrabberPosition = tCameraDirection.forward;
+        newGrabberPosition += tCameraDirection.TransformVector(0, grabberYOffset, 0);
         newGrabberPosition *= grabberDistance;
-        tGrabber.position = tCamera.position + newGrabberPosition;
-        tGrabber.rotation = tDirection.rotation;
+        tGrabber.position = tCameraDirection.position + newGrabberPosition;
+        tGrabber.rotation = tCameraDirection.rotation;
     }
 
     private void InteractWithObject(bool interactKey)
@@ -138,7 +119,7 @@ public class PlayerController : MonoBehaviour
         int layerMask = 1 << 6;
 
         //we RayCast using the Camera rather than the player to account for pitch
-        Ray interactRay = new Ray(tCamera.position, tCamera.TransformDirection(Vector3.forward));
+        Ray interactRay = new Ray(tCameraDirection.position, tCameraDirection.TransformDirection(Vector3.forward));
         RaycastHit hit;
         if (interactKey && Physics.Raycast(interactRay, out hit, interactDistance, layerMask, QueryTriggerInteraction.Ignore))
         {

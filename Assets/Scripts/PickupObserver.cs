@@ -14,9 +14,8 @@ public class PickupObserver : MonoBehaviour
     private bool isPicked = false;
 
     #region Pickup Lerp properties
-    float lerpDuration = 1;
+    float lerpDuration = 0.5f;
     Transform lerpStart;
-    Transform lerpEnd;
     Vector3 interpolatedPosition;
     Vector3 interpolatedRotation;
     #endregion
@@ -35,32 +34,22 @@ public class PickupObserver : MonoBehaviour
         }
     }
 
-    //private void FixedUpdate()
-    //{
-    //    if (grabberTransform == null) return;
-
-    //    rb.MovePosition(grabberTransform.position);
-    //    rb.MoveRotation(grabberTransform.rotation);
-    //}
-    private void Update()
+    private void FixedUpdate()
     {
         if (!isPicked) return;
 
-        t.position = (grabberTransform.position);
-        t.rotation = (grabberTransform.rotation);
     }
-
+ 
     public void OnPickup(Transform playerGrabber)
     {
         grabberTransform = playerGrabber;
         grabberTransform.GetComponentInParent<PlayerController>().pickedItem = this.gameObject;
-        rb.useGravity = false;
-        rb.isKinematic = true;
-        t.GetComponent<Collider>().enabled = false;
 
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        GameObject.Destroy(rb);
 
         lerpStart = transform;
-        lerpEnd = playerGrabber.transform;
         StartCoroutine(PickUpLerp());
         
     }
@@ -71,19 +60,28 @@ public class PickupObserver : MonoBehaviour
 
         while (timeElapsed < lerpDuration)
         {
-            interpolatedPosition = Vector3.Lerp(lerpStart.position, lerpEnd.position, timeElapsed / lerpDuration);
-            interpolatedRotation = Vector3.Lerp(lerpStart.rotation.eulerAngles, lerpEnd.rotation.eulerAngles, timeElapsed / lerpDuration);
-            rb.MovePosition(interpolatedPosition);
-            rb.MoveRotation(Quaternion.Euler(interpolatedRotation));
+            interpolatedPosition = Vector3.Lerp(lerpStart.position, grabberTransform.position, timeElapsed / lerpDuration);
+            interpolatedRotation = Vector3.Lerp(lerpStart.rotation.eulerAngles, grabberTransform.rotation.eulerAngles, timeElapsed / lerpDuration);
+            t.position = interpolatedPosition;
+            t.rotation = Quaternion.Euler(interpolatedRotation);
 
             timeElapsed += Time.deltaTime;
-            yield return null;
+            yield return null;  
         }
-
-        rb.MovePosition(lerpEnd.position);
-        rb.MoveRotation(lerpEnd.rotation);
-        //rb.isKinematic = false; // re-enable when you deprecate using position transform to move
+        t.position = grabberTransform.position;
+        t.rotation = grabberTransform.rotation;
         isPicked = true;
+        t.SetParent(grabberTransform);
+
+        yield return null;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Player")
+        {
+            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
+        }
     }
 
     private void OnDestroy()
