@@ -20,7 +20,7 @@ public class PickupObserver : MonoBehaviour
     Vector3 interpolatedRotation;
     #endregion
 
-    // Start is called before the first frame update
+
     void Start()
     {
         // Get References
@@ -38,6 +38,19 @@ public class PickupObserver : MonoBehaviour
     {
         if (!isPicked) return;
 
+        if (Vector3.Distance(t.position,grabberTransform.position) > 0.01f)
+        {
+            Vector3 moveDirection = grabberTransform.position - t.position;
+            rb.AddForce(-rb.velocity, ForceMode.VelocityChange);
+
+            Vector3 vel = moveDirection.normalized * (moveDirection.magnitude - 0.01f) * 1200 * Time.fixedDeltaTime;
+
+            rb.AddForce(vel, ForceMode.VelocityChange);
+        }
+        else
+        {
+            rb.velocity = Vector3.zero;
+        }
     }
  
     public void OnPickup(Transform playerGrabber)
@@ -47,7 +60,9 @@ public class PickupObserver : MonoBehaviour
 
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        GameObject.Destroy(rb);
+        //GameObject.Destroy(rb);
+        rb.freezeRotation = true;
+        rb.useGravity = false;
 
         lerpStart = transform;
         StartCoroutine(PickUpLerp());
@@ -71,7 +86,7 @@ public class PickupObserver : MonoBehaviour
         t.position = grabberTransform.position;
         t.rotation = grabberTransform.rotation;
         isPicked = true;
-        t.SetParent(grabberTransform);
+        //t.SetParent(grabberTransform);
 
         yield return null;
     }
