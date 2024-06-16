@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.SceneManagement;
+
 
 //using System.Numerics;
 using UnityEngine;
@@ -14,6 +16,7 @@ public class PickupObserver : MonoBehaviour
     private Transform t;
     private Transform grabberTransform = null;
     private bool isPicked = false;
+    private FixedJoint joint;
 
     #region Pickup Lerp properties
     float lerpDuration = 0.5f;
@@ -40,17 +43,13 @@ public class PickupObserver : MonoBehaviour
     {
         if (!isPicked) return;
 
-        
 
-        Vector3 movement = grabberTransform.position-t.position;
-        rb.velocity = Vector3.zero;
-        if (movement.magnitude > 0.01)
-        {
-            movement.Normalize();
-            movement *= (Time.fixedDeltaTime + 100f);
-            rb.AddForce(movement, ForceMode.Force);
-        }
-        
+
+        //Vector3 movement = grabberTransform.position-t.position;
+        //movement *= (Time.fixedDeltaTime + 20f);
+        //rb.AddForce(-rb.velocity, ForceMode.VelocityChange);
+        //rb.AddForce(movement, ForceMode.VelocityChange);
+        joint.connectedAnchor = grabberTransform.localPosition;
     }
 
     public void OnPickup(Transform playerGrabber)
@@ -85,9 +84,14 @@ public class PickupObserver : MonoBehaviour
         t.position = grabberTransform.position;
         t.rotation = grabberTransform.rotation;
         isPicked = true;
-        //t.SetParent(grabberTransform);
         rb.isKinematic = false;
         rb.freezeRotation = true;
+
+        joint = this.AddComponent<FixedJoint>();
+        joint.anchor = Vector3.zero;
+        joint.connectedBody = grabberTransform.GetComponentInParent<Rigidbody>();
+        joint.autoConfigureConnectedAnchor = false;
+        joint.connectedAnchor = grabberTransform.localPosition;
 
         yield return null;
     }

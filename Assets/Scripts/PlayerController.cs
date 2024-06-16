@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // sotring new direction in the Direction object
+        // storing new direction in the Direction object
         float mouseX = Input.GetAxisRaw("Mouse X");
         float mouseY = Input.GetAxisRaw("Mouse Y");
         UpdateDirection(mouseX, mouseY);
