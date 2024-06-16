@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEngine;
 using System;
 using UnityEditor;
-//using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
 {
@@ -32,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private Transform tPlayer;
     private Transform tCameraDirection;
     private Transform tGrabber;
+    private Transform tRenderer;
 
     void Start()
     {
@@ -40,22 +40,27 @@ public class PlayerController : MonoBehaviour
         tPlayer = GetComponent<Transform>();
         tCameraDirection = tPlayer.Find("CameraDirection");
         tGrabber = tPlayer.Find("Grabber");
+        tRenderer = tPlayer.Find("Renderer&Collider");
 
         // Apply components properties
         rbPlayer.constraints = RigidbodyConstraints.FreezeRotation;
 
-        // Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         // Spawn on Starting point
         if (startingPoint != null )
         {
+            Cursor.lockState = CursorLockMode.None;
+            Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+            Cursor.SetCursor(null, screenCenter, CursorMode.Auto);
+
             rbPlayer.isKinematic = true;
             rbPlayer.position = startingPoint.position;
             rbPlayer.rotation = startingPoint.rotation;
             rbPlayer.isKinematic = false;
         }
+
+        // Lock cursor
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
@@ -91,6 +96,9 @@ public class PlayerController : MonoBehaviour
         Vector3 newPosition = tPlayer.position;
         newPosition.y += cameraYOffset;
         tCameraDirection.position = newPosition;
+
+        //rotate player rendere, not rigidbody
+        tRenderer.eulerAngles = new Vector3(0,tCameraDirection.eulerAngles.y,0);
     }
 
     private void MovePlayer(float horizontalMovement, float verticalMovement)
@@ -100,7 +108,6 @@ public class PlayerController : MonoBehaviour
         movement *= movementSpeed * Time.fixedDeltaTime;
         movement.y = rbPlayer.velocity.y; // As we're manipulating speed directly, take care not changing vertical speed
         rbPlayer.AddForce(movement - rbPlayer.velocity,ForceMode.VelocityChange);
-        rbPlayer.rotation = Quaternion.Euler(0f, tCameraDirection.rotation.y, 0f);
     }
 
     private void MoveGrabber()

@@ -12,7 +12,7 @@ public class PlayerCameraController : MonoBehaviour
         tPlayerDirection = tPlayer.Find("CameraDirection").transform;
     }
 
-    void Update()
+    void LateUpdate()
     {
         MoveCamera();
     }
