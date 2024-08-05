@@ -93,11 +93,11 @@ public class PlayerController : MonoBehaviour
         yaw += mouseX * mouseXSensitivity * Time.deltaTime;
         tCameraDirection.rotation = Quaternion.Euler(pitch, yaw, 0);
 
-        Vector3 newPosition = tPlayer.position;
+        Vector3 newPosition = rbPlayer.position; // using player RigidBody results in jittery camera, so I'm using Transform
         newPosition.y += cameraYOffset;
         tCameraDirection.position = newPosition;
 
-        //rotate player rendere, not rigidbody
+        //rotate player renderer, not rigidbody to avoid physics issues
         tRenderer.eulerAngles = new Vector3(0,tCameraDirection.eulerAngles.y,0);
     }
 

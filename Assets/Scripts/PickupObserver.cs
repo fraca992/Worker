@@ -92,6 +92,7 @@ public class PickupObserver : MonoBehaviour
         joint.connectedBody = grabberTransform.GetComponentInParent<Rigidbody>();
         joint.autoConfigureConnectedAnchor = false;
         joint.connectedAnchor = grabberTransform.localPosition;
+        joint.massScale = 1000; //to not make the player move along the picked object, test different values!
 
         yield return null;
     }
