@@ -21,8 +21,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float interactDistance = 3f;
     [SerializeField] private float grabberDistance = 1.5f;
     [SerializeField] private float grabberYOffset = -0.11f;
+    [SerializeField] private float maxThrowForce = 10f;
+    private float throwForce = 0f;
+    private float throwTime = 0f;
+    private float maxThrowTime = 1f; // hardcoding 1s max throw time
     public GameObject pickedItem = null;
     public event Action<Transform> PickedUp;
+
+
 
     [Header("Misc")]
     [SerializeField] private Transform startingPoint;
@@ -48,7 +54,7 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // Spawn on Starting point
+        // Spawn on Starting point TODO: not really working as intended. probably best to move to a game manager
         if (startingPoint != null )
         {
             rbPlayer.isKinematic = true;
@@ -65,12 +71,27 @@ public class PlayerController : MonoBehaviour
         float mouseY = Input.GetAxisRaw("Mouse Y");
         UpdateDirection(mouseX, mouseY);
 
-        // Interact with objects using Raycast
-        bool interactKey = Input.GetKeyDown(KeyCode.E);
-        InteractWithObject(interactKey);
-
         // Move Grabber
         MoveGrabber();
+
+        ///// Interact with objects using Raycast
+        // pick up obbject
+        bool isInteractKeyDown = Input.GetKeyDown(KeyCode.E); // TODO: eventually make it changeable
+        bool isInteracting = InteractWithObject(isInteractKeyDown);
+
+        // throw object
+        bool isThrowing = (isInteractKeyDown || Input.GetKey(KeyCode.E)) && !isInteracting && pickedItem != null;
+        if (isThrowing)
+        {
+            throwTime = Mathf.Clamp(throwTime + Time.deltaTime, 0f, maxThrowTime);
+            Debug.Log("throwing! Time: " + throwTime);
+        }
+        else
+        {
+            throwForce = (maxThrowForce * throwTime) / maxThrowTime;
+            isThrowing = false;
+            // invoking throwed as pickup interaction, then passing Force to PickupObserver
+        }
     }
 
     void FixedUpdate()
@@ -113,7 +134,7 @@ public class PlayerController : MonoBehaviour
         tGrabber.rotation = tCameraDirection.rotation;
     }
 
-    private void InteractWithObject(bool interactKey)
+    private bool InteractWithObject(bool interactKey)
     {
         //Selecting Layer 6: Interactable Obects for our RayCast
         int layerMask = 1 << 6;
@@ -121,13 +142,16 @@ public class PlayerController : MonoBehaviour
         //we RayCast using the Camera rather than the player to account for pitch
         Ray interactRay = new Ray(tCameraDirection.position, tCameraDirection.TransformDirection(Vector3.forward));
         RaycastHit hit;
+        bool hasInteracted = false;
         if (interactKey && Physics.Raycast(interactRay, out hit, interactDistance, layerMask, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
             {
                 PickupInteraction();
             }
+            hasInteracted = true;
         }
+        return hasInteracted;
     }
 
     public void PickupInteraction()

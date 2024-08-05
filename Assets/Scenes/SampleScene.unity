@@ -817,6 +817,7 @@ MonoBehaviour:
   interactDistance: 2
   grabberDistance: 1.5
   grabberYOffset: -0.11
+  maxThrowForce: 10
   pickedItem: {fileID: 0}
   startingPoint: {fileID: 735277027}
   cameraYOffset: 0.8
@@ -1563,7 +1564,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 1707740932}
-  DebugOptions: 1
+  DebugOptions: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
