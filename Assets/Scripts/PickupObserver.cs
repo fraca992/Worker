@@ -1,5 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.SceneManagement;
+
+
 //using System.Numerics;
 using UnityEngine;
 
@@ -12,6 +16,7 @@ public class PickupObserver : MonoBehaviour
     private Transform t;
     private Transform grabberTransform = null;
     private bool isPicked = false;
+    private FixedJoint joint;
 
     #region Pickup Lerp properties
     float lerpDuration = 0.5f;
@@ -20,7 +25,7 @@ public class PickupObserver : MonoBehaviour
     Vector3 interpolatedRotation;
     #endregion
 
-    // Start is called before the first frame update
+
     void Start()
     {
         // Get References
@@ -38,8 +43,15 @@ public class PickupObserver : MonoBehaviour
     {
         if (!isPicked) return;
 
+
+
+        //Vector3 movement = grabberTransform.position-t.position;
+        //movement *= (Time.fixedDeltaTime + 20f);
+        //rb.AddForce(-rb.velocity, ForceMode.VelocityChange);
+        //rb.AddForce(movement, ForceMode.VelocityChange);
+        joint.connectedAnchor = grabberTransform.localPosition;
     }
- 
+
     public void OnPickup(Transform playerGrabber)
     {
         grabberTransform = playerGrabber;
@@ -47,7 +59,8 @@ public class PickupObserver : MonoBehaviour
 
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        GameObject.Destroy(rb);
+        rb.isKinematic = true;
+        rb.useGravity = false;
 
         lerpStart = transform;
         StartCoroutine(PickUpLerp());
@@ -71,7 +84,15 @@ public class PickupObserver : MonoBehaviour
         t.position = grabberTransform.position;
         t.rotation = grabberTransform.rotation;
         isPicked = true;
-        t.SetParent(grabberTransform);
+        rb.isKinematic = false;
+        rb.freezeRotation = true;
+
+        joint = this.AddComponent<FixedJoint>();
+        joint.anchor = Vector3.zero;
+        joint.connectedBody = grabberTransform.GetComponentInParent<Rigidbody>();
+        joint.autoConfigureConnectedAnchor = false;
+        joint.connectedAnchor = grabberTransform.localPosition;
+        joint.massScale = 1000; //to not make the player move along the picked object, test different values!
 
         yield return null;
     }

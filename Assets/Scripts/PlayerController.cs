@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEngine;
 using System;
 using UnityEditor;
-//using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
 {
@@ -38,6 +37,7 @@ public class PlayerController : MonoBehaviour
     private Transform tPlayer;
     private Transform tCameraDirection;
     private Transform tGrabber;
+    private Transform tRenderer;
 
     void Start()
     {
@@ -46,27 +46,32 @@ public class PlayerController : MonoBehaviour
         tPlayer = GetComponent<Transform>();
         tCameraDirection = tPlayer.Find("CameraDirection");
         tGrabber = tPlayer.Find("Grabber");
+        tRenderer = tPlayer.Find("Renderer&Collider");
 
         // Apply components properties
         rbPlayer.constraints = RigidbodyConstraints.FreezeRotation;
 
-        // Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         // Spawn on Starting point TODO: not really working as intended. probably best to move to a game manager
         if (startingPoint != null )
         {
+            Cursor.lockState = CursorLockMode.None;
+            Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+            Cursor.SetCursor(null, screenCenter, CursorMode.Auto);
+
             rbPlayer.isKinematic = true;
             rbPlayer.position = startingPoint.position;
             rbPlayer.rotation = startingPoint.rotation;
             rbPlayer.isKinematic = false;
         }
+
+        // Lock cursor
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
     {
-        // sotring new direction in the Direction object
+        // storing new direction in the Direction object
         float mouseX = Input.GetAxisRaw("Mouse X");
         float mouseY = Input.GetAxisRaw("Mouse Y");
         UpdateDirection(mouseX, mouseY);
@@ -109,9 +114,12 @@ public class PlayerController : MonoBehaviour
         yaw += mouseX * mouseXSensitivity * Time.deltaTime;
         tCameraDirection.rotation = Quaternion.Euler(pitch, yaw, 0);
 
-        Vector3 newPosition = tPlayer.position;
+        Vector3 newPosition = rbPlayer.position; // using player RigidBody results in jittery camera, so I'm using Transform
         newPosition.y += cameraYOffset;
         tCameraDirection.position = newPosition;
+
+        //rotate player renderer, not rigidbody to avoid physics issues
+        tRenderer.eulerAngles = new Vector3(0,tCameraDirection.eulerAngles.y,0);
     }
 
     private void MovePlayer(float horizontalMovement, float verticalMovement)
@@ -121,7 +129,6 @@ public class PlayerController : MonoBehaviour
         movement *= movementSpeed * Time.fixedDeltaTime;
         movement.y = rbPlayer.velocity.y; // As we're manipulating speed directly, take care not changing vertical speed
         rbPlayer.AddForce(movement - rbPlayer.velocity,ForceMode.VelocityChange);
-        rbPlayer.rotation = Quaternion.Euler(0f, tCameraDirection.rotation.y, 0f);
     }
 
     private void MoveGrabber()
