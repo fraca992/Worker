@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEngine;
 using System;
 using UnityEditor;
+using System.Runtime.CompilerServices;
 //using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
@@ -22,13 +23,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float grabberDistance = 1.5f;
     [SerializeField] private float grabberYOffset = -0.11f;
     [SerializeField] private float maxThrowForce = 10f;
-    private float throwForce = 0f;
     private float throwTime = 0f;
     private float maxThrowTime = 1f; // hardcoding 1s max throw time
     public GameObject pickedItem = null;
     public event Action<Transform> PickedUp;
-
-
+    public event Action<Commons.ThrowInformation> Thrown;
 
     [Header("Misc")]
     [SerializeField] private Transform startingPoint;
@@ -88,9 +87,11 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            throwForce = (maxThrowForce * throwTime) / maxThrowTime;
+            float throwForce = (maxThrowForce * throwTime) / maxThrowTime;
             isThrowing = false;
-            // invoking throwed as pickup interaction, then passing Force to PickupObserver
+            Commons.ThrowInformation throwInfo;
+            throwInfo = new Commons.ThrowInformation(throwForce, tCameraDirection.position.normalized);
+            ThrowInteraction(throwInfo);
         }
     }
 
@@ -147,15 +148,20 @@ public class PlayerController : MonoBehaviour
         {
             if (hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
             {
-                PickupInteraction();
+                PickupInteraction(tGrabber);
             }
             hasInteracted = true;
         }
         return hasInteracted;
     }
 
-    public void PickupInteraction()
+    public void PickupInteraction(Transform grabPoint)
     {
-        PickedUp?.Invoke(tGrabber);
+        PickedUp?.Invoke(grabPoint);
+    }
+
+    public void ThrowInteraction(Commons.ThrowInformation throwInfo)
+    {
+        Thrown?.Invoke(throwInfo);
     }
 }
