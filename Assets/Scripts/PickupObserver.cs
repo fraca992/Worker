@@ -36,6 +36,7 @@ public class PickupObserver : MonoBehaviour
         if (PlayerSubject != null)
         {
             PlayerSubject.PickedUp += OnPickup;
+            PlayerSubject.Thrown += OnThrow;
         }
     }
 
@@ -43,12 +44,6 @@ public class PickupObserver : MonoBehaviour
     {
         if (!isPicked) return;
 
-
-
-        //Vector3 movement = grabberTransform.position-t.position;
-        //movement *= (Time.fixedDeltaTime + 20f);
-        //rb.AddForce(-rb.velocity, ForceMode.VelocityChange);
-        //rb.AddForce(movement, ForceMode.VelocityChange);
         joint.connectedAnchor = grabberTransform.localPosition;
     }
 
@@ -66,7 +61,6 @@ public class PickupObserver : MonoBehaviour
         StartCoroutine(PickUpLerp());
         
     }
-
     IEnumerator PickUpLerp()
     {
         float timeElapsed = 0;
@@ -97,6 +91,14 @@ public class PickupObserver : MonoBehaviour
         yield return null;
     }
 
+    public void OnThrow(Commons.ThrowInformation ti)
+    {
+        //TODO: Implement throw logic
+
+        grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
+
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Player")
@@ -110,6 +112,7 @@ public class PickupObserver : MonoBehaviour
         if (PlayerSubject != null)
         {
             PlayerSubject.PickedUp -= OnPickup;
+            PlayerSubject.Thrown -= OnThrow;
         }
     }
 }
