@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Commons : MonoBehaviour
+public static class Commons
 {
     public struct ThrowInformation
     {

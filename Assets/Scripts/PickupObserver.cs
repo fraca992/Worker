@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
+using static Commons;
 
 
 //using System.Numerics;
@@ -94,7 +95,7 @@ public class PickupObserver : MonoBehaviour
         yield return null;
     }
 
-    public void OnThrow(Commons.ThrowInformation ti)
+    public void OnThrow(ThrowInformation ti)
     {
         //TODO: Implement throw logic
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;

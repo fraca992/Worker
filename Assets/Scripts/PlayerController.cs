@@ -5,6 +5,8 @@ using UnityEngine;
 using System;
 using UnityEditor;
 using System.Runtime.CompilerServices;
+using static Commons;
+using UnityEngine.UI;
 //using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
@@ -27,7 +29,8 @@ public class PlayerController : MonoBehaviour
     private float maxThrowTime = 2f; // hardcoding 1s max throw time
     public GameObject pickedItem = null;
     public event Action<Transform> PickedUp;
-    public event Action<Commons.ThrowInformation> Thrown;
+    public event Action<ThrowInformation> Thrown;
+    [SerializeField] private Slider throwSlider;
     public bool isInteracting = false;
 
     [Header("Misc")]
@@ -48,6 +51,9 @@ public class PlayerController : MonoBehaviour
         tCameraDirection = tPlayer.Find("CameraDirection");
         tGrabber = tPlayer.Find("Grabber");
         tRenderer = tPlayer.Find("Renderer&Collider");
+
+        if (throwSlider == null) { Debug.LogError("Throw Slider not assigned!"); }
+
 
         // Apply components properties
         rbPlayer.constraints = RigidbodyConstraints.FreezeRotation;
@@ -92,14 +98,17 @@ public class PlayerController : MonoBehaviour
             if (isThrowing)
             {
                 throwTime = Mathf.Clamp(throwTime + Time.deltaTime, 0f, maxThrowTime);
+                throwSlider.GetComponent<ThrowBarManager>().SetValuePercentage(throwTime/maxThrowTime);
+
             }
             else if (Input.GetKeyUp(KeyCode.E))
             {
                 float throwForce = (maxThrowForce * throwTime) / maxThrowTime;
                 throwTime = 0f;
                 isThrowing = false;
-                Commons.ThrowInformation throwInfo = new Commons.ThrowInformation(throwForce, tCameraDirection.forward);
+                ThrowInformation throwInfo = new ThrowInformation(throwForce, tCameraDirection.forward);
                 ThrowInteraction(throwInfo);
+                throwSlider.GetComponent<ThrowBarManager>().SetValuePercentage(0f);
             }
         }
     }
@@ -171,7 +180,7 @@ public class PlayerController : MonoBehaviour
         PickedUp?.Invoke(grabPoint);
     }
 
-    public void ThrowInteraction(Commons.ThrowInformation throwInfo)
+    public void ThrowInteraction(ThrowInformation throwInfo)
     {
         Thrown?.Invoke(throwInfo);
     }
