@@ -24,10 +24,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float grabberYOffset = -0.11f;
     [SerializeField] private float maxThrowForce = 10f;
     private float throwTime = 0f;
-    private float maxThrowTime = 1f; // hardcoding 1s max throw time
+    private float maxThrowTime = 2f; // hardcoding 1s max throw time
     public GameObject pickedItem = null;
     public event Action<Transform> PickedUp;
     public event Action<Commons.ThrowInformation> Thrown;
+    public bool isInteracting = false;
 
     [Header("Misc")]
     [SerializeField] private Transform startingPoint;
@@ -82,22 +83,23 @@ public class PlayerController : MonoBehaviour
         ///// Interact with objects using Raycast
         // pick up obbject
         bool isInteractKeyDown = Input.GetKeyDown(KeyCode.E); // TODO: eventually make it changeable
-        bool isInteracting = InteractWithObject(isInteractKeyDown);
+        InteractWithObject(isInteractKeyDown);
 
         // throw object
-        bool isThrowing = (isInteractKeyDown || Input.GetKey(KeyCode.E)) && !isInteracting && pickedItem != null;
-        if (isThrowing)
+        if (pickedItem != null && !isInteracting)
         {
-            throwTime = Mathf.Clamp(throwTime + Time.deltaTime, 0f, maxThrowTime);
-            Debug.Log("throwing! Time: " + throwTime);
-        }
-        else
-        {
-            float throwForce = (maxThrowForce * throwTime) / maxThrowTime;
-            isThrowing = false;
-            Commons.ThrowInformation throwInfo;
-            throwInfo = new Commons.ThrowInformation(throwForce, tCameraDirection.position.normalized);
-            ThrowInteraction(throwInfo);
+            bool isThrowing = (Input.GetKey(KeyCode.E));
+            if (isThrowing)
+            {
+                throwTime = Mathf.Clamp(throwTime + Time.deltaTime, 0f, maxThrowTime);
+            }
+            else if (Input.GetKeyUp(KeyCode.E))
+            {
+                float throwForce = (maxThrowForce * throwTime) / maxThrowTime;
+                isThrowing = false;
+                Commons.ThrowInformation throwInfo = new Commons.ThrowInformation(throwForce, tCameraDirection.position.normalized);
+                ThrowInteraction(throwInfo);
+            }
         }
     }
 

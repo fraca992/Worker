@@ -51,6 +51,7 @@ public class PickupObserver : MonoBehaviour
     {
         grabberTransform = playerGrabber;
         grabberTransform.GetComponentInParent<PlayerController>().pickedItem = this.gameObject;
+        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
 
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
@@ -88,15 +89,16 @@ public class PickupObserver : MonoBehaviour
         joint.connectedAnchor = grabberTransform.localPosition;
         joint.massScale = 1000; //to not make the player move along the picked object, test different values!
 
+        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
         yield return null;
     }
 
     public void OnThrow(Commons.ThrowInformation ti)
     {
         //TODO: Implement throw logic
-
-        grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
-
+        //grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
+        //grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
+        //grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
     }
 
     void OnCollisionEnter(Collision collision)
