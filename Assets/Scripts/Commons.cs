@@ -12,7 +12,7 @@ public class Commons : MonoBehaviour
             direction = dir;
         }
 
-        float force;
-        Vector3 direction;
+        public float force;
+        public Vector3 direction;
     }
 }

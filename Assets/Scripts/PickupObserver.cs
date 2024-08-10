@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 
@@ -96,9 +97,15 @@ public class PickupObserver : MonoBehaviour
     public void OnThrow(Commons.ThrowInformation ti)
     {
         //TODO: Implement throw logic
-        //grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
+        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
         //grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
-        //grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
+        
+        Debug.DrawLine(grabberTransform.position, grabberTransform.position + (ti.direction * ti.force),Color.red,5f);
+        Debug.Log(ti);
+
+        
+
+        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
     }
 
     void OnCollisionEnter(Collision collision)

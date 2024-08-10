@@ -1,0 +1,117 @@
+[33mcommit e309dd71aa62387aa5147bf8597a9edfbf932def[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mthrow-test[m[33m)[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Sat Aug 10 12:59:20 2024 +0300
+
+    throwing interaction activates correctly now
+    
+    The interacted object now handles setting and resetting the isInteracting flag of the player controller
+
+[33mcommit 1ae96e1ae6a0b56813a8bcacf6c00a886eff177d[m[33m ([m[1;32mmaster[m[33m)[m
+Merge: 2a0b189 d53d80b
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Fri Aug 9 19:44:28 2024 +0300
+
+    conflict merge
+
+[33mcommit 2a0b18986ec0953a0c677a550f89e1a4c7d1c9bf[m
+Merge: 1d5cc2f 21db325
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Fri Aug 9 19:39:46 2024 +0300
+
+    conflict merge
+
+[33mcommit d53d80b4cf2b43cb464a524c099d22040286c4a3[m[33m ([m[1;32mthrow-function[m[33m)[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Fri Aug 9 19:19:45 2024 +0300
+
+    Starting implementing throw
+
+[33mcommit 1d5cc2f7a499cde0f2c352dd5ebbea1e0fe61c36[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Mon Aug 5 23:31:49 2024 +0300
+
+    working on throwing picked object
+
+[33mcommit 21db325a1b8257d0aebb366c99b324314f6a4924[m[33m ([m[1;31morigin/pickup-test[m[33m, [m[1;32mpickup-test[m[33m)[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Mon Aug 5 22:53:51 2024 +0300
+
+    for now settled on Fixed Hinge. there are issues with the interaction with the FPS camera
+
+[33mcommit 0c935baca4443988ad938ee29f049de1d68fb8fb[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Sun Jun 16 20:12:09 2024 +0300
+
+    testing with FixedJoint
+
+[33mcommit 2f7693ba59307f97f8465f909a0a2c9dc323582c[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Sun Jun 16 18:13:41 2024 +0300
+
+    testing without player rigidbody rotation
+
+[33mcommit 91736a7b75c1ec3c59c1ee9831756a88b8d2bb62[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Thu Jun 6 08:42:59 2024 +0300
+
+    tried physics, spherecasting, joints... not dice. try a character controller then
+
+[33mcommit dbac76202d2801334c65d3af384fe89c03dd63b2[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Mon Jun 3 07:56:09 2024 +0300
+
+    keeping object rb causes jittering on player camera. try sphere casting and no rb next
+
+[33mcommit 60365b90ca03d0866880c449c2e2e6787d472bf5[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 29 09:36:58 2024 +0300
+
+    fixed (hopefully forever) jittering camera issue by separating camera from player object and introducting buffer CameraDirection transform
+
+[33mcommit f3b6e8bb016a3f615f60100d82a88784d083e261[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 22 17:13:33 2024 +0300
+
+    removed Debug logic
+
+[33mcommit ed1d18f976ca041b84eb8c9c00aa8e635352a7d5[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 22 17:09:53 2024 +0300
+
+    fixed Grabber movement logic, switched to world coordinates
+
+[33mcommit 56c7e85c524cf0314341c1f4ca92a7e216095401[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 22 10:42:55 2024 +0300
+
+    changed a few settings for Grabber, added Debug Camera
+
+[33mcommit d6a40736f7e67ba73b25566289bc8b15ae96331c[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Mon May 20 22:03:44 2024 +0300
+
+    cleaning up PlayerController.cs
+
+[33mcommit 93385f01d7613d5467c97bfd60ded2c82a06e633[m[33m ([m[1;32mrb_rotation_test[m[33m)[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Mon May 20 19:08:36 2024 +0300
+
+    solved the jittery rotation. issue is mismatch between transform and rigidbody position and rotation when interpolating. solved by adding an empty child to store and share rotation
+
+[33mcommit cbe87db660bacf48f3268ea4ffa40671c48fff7a[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 8 17:57:59 2024 +0300
+
+    improved grab interaction
+
+[33mcommit e115da5e120119fc5bd03e197a140cee13a5dbb9[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 1 23:07:56 2024 +0300
+
+    prototyping fuindamental mechanics
+
+[33mcommit 28db65178ac5706a64f6db5eaabe3c56d83f841b[m
+Author: FrancescoC <francesco.capirci@gmail.com>
+Date:   Wed May 1 23:07:05 2024 +0300
+
+    initial commit

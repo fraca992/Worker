@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
         ///// Interact with objects using Raycast
         // pick up obbject
         bool isInteractKeyDown = Input.GetKeyDown(KeyCode.E); // TODO: eventually make it changeable
-        InteractWithObject(isInteractKeyDown);
+        InteractWithObject(isInteractKeyDown && !isInteracting);
 
         // throw object
         if (pickedItem != null && !isInteracting)
@@ -96,8 +96,9 @@ public class PlayerController : MonoBehaviour
             else if (Input.GetKeyUp(KeyCode.E))
             {
                 float throwForce = (maxThrowForce * throwTime) / maxThrowTime;
+                throwTime = 0f;
                 isThrowing = false;
-                Commons.ThrowInformation throwInfo = new Commons.ThrowInformation(throwForce, tCameraDirection.position.normalized);
+                Commons.ThrowInformation throwInfo = new Commons.ThrowInformation(throwForce, tCameraDirection.forward);
                 ThrowInteraction(throwInfo);
             }
         }
@@ -156,7 +157,7 @@ public class PlayerController : MonoBehaviour
         bool hasInteracted = false;
         if (interactKey && Physics.Raycast(interactRay, out hit, interactDistance, layerMask, QueryTriggerInteraction.Ignore))
         {
-            if (hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
+            if (pickedItem == null && hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
             {
                 PickupInteraction(tGrabber);
             }
