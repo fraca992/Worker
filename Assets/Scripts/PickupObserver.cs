@@ -76,7 +76,7 @@ public class PickupObserver : MonoBehaviour
             t.rotation = Quaternion.Euler(interpolatedRotation);
 
             timeElapsed += Time.deltaTime;
-            yield return null;  
+            yield return null;
         }
         t.position = grabberTransform.position;
         t.rotation = grabberTransform.rotation;
@@ -99,14 +99,18 @@ public class PickupObserver : MonoBehaviour
     {
         //TODO: Implement throw logic
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
-        //grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
-        
-        Debug.DrawLine(grabberTransform.position, grabberTransform.position + (ti.direction * ti.force),Color.red,5f);
-        Debug.Log(ti);
+        rb.isKinematic = false;
+        rb.freezeRotation = false;
+        rb.useGravity = true;
+        Object.Destroy(joint);
 
-        
+        Debug.DrawLine(grabberTransform.position, grabberTransform.position + (ti.direction * ti.force), Color.red, 5f);
+        rb.AddForce(ti.force * ti.direction,ForceMode.Impulse);
 
+        isPicked = false;
+        grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
+        grabberTransform = null;
     }
 
     void OnCollisionEnter(Collision collision)
