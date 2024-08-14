@@ -13,6 +13,7 @@ public class PickupObserver : MonoBehaviour
 {
     [Header("Observer")]
     [SerializeField] PlayerController PlayerSubject;
+    [SerializeField] float maxGrabberDistance = 1f;
 
     private Rigidbody rb;
     private Transform t;
@@ -47,6 +48,13 @@ public class PickupObserver : MonoBehaviour
         if (!isPicked) return;
 
         joint.connectedAnchor = grabberTransform.localPosition;
+
+        float grabberDistance = (grabberTransform.position - rb.position).magnitude;
+        if (grabberDistance >= maxGrabberDistance)
+        {
+            ThrowInformation dropThrow = new ThrowInformation(0f,Vector3.zero);
+            OnThrow(dropThrow);
+        }
     }
 
     public void OnPickup(Transform playerGrabber)

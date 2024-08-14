@@ -1434,6 +1434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerSubject: {fileID: 1208686797}
+  maxGrabberDistance: 1
 --- !u!1 &1957040753
 GameObject:
   m_ObjectHideFlags: 0
