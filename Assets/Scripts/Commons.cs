@@ -15,4 +15,9 @@ public static class Commons
         public float force;
         public Vector3 direction;
     }
+
+    public interface IInteractable
+    {
+        public void OnInteract(Transform playerGrabber);
+    }
 }
