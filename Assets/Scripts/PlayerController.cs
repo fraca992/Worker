@@ -170,6 +170,11 @@ public class PlayerController : MonoBehaviour
             {
                 PickupInteraction(tGrabber);
             }
+            else if (hit.collider.gameObject.tag == "Interactable")
+            {
+                PickupInteraction(tGrabber);
+            }
+
             hasInteracted = true;
         }
         return hasInteracted;
