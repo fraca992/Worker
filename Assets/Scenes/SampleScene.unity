@@ -1408,7 +1408,7 @@ GameObject:
   - component: {fileID: 1803048908}
   m_Layer: 6
   m_Name: PickMeUp
-  m_TagString: Pickup
+  m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1859,6 +1859,10 @@ PrefabInstance:
     - target: {fileID: 154113519496415257, guid: b79b99df9b194d945ad1d1e09abc68ef, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 5108988352381130022, guid: b79b99df9b194d945ad1d1e09abc68ef, type: 3}
+      propertyPath: OpeningSpeed
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 5108988352381130022, guid: b79b99df9b194d945ad1d1e09abc68ef, type: 3}
       propertyPath: PlayerSubject

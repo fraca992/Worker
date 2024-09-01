@@ -1,15 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
-using UnityEditor.SceneManagement;
+using UnityEngine;
 using static Commons;
 
-
-//using System.Numerics;
-using UnityEngine;
-
-public class PickupObserver : MonoBehaviour
+public class PickupObserver : MonoBehaviour, IInteractable
 {
     [Header("Observer")]
     [SerializeField] PlayerController PlayerSubject;
@@ -38,7 +32,7 @@ public class PickupObserver : MonoBehaviour
         // Subscribe to Subject
         if (PlayerSubject != null)
         {
-            PlayerSubject.PickedUp += OnPickup;
+            PlayerSubject.Interacted += OnInteract;
             PlayerSubject.Thrown += OnThrow;
         }
     }
@@ -57,9 +51,11 @@ public class PickupObserver : MonoBehaviour
         }
     }
 
-    public void OnPickup(Transform playerGrabber)
+    public void OnInteract(InteractInformation info)
     {
-        grabberTransform = playerGrabber;
+        if (isPicked || info.interactableTransform != transform) return;
+
+        grabberTransform = info.grabberTransform;
         grabberTransform.GetComponentInParent<PlayerController>().pickedItem = this.gameObject;
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
 
@@ -133,7 +129,7 @@ public class PickupObserver : MonoBehaviour
     {
         if (PlayerSubject != null)
         {
-            PlayerSubject.PickedUp -= OnPickup;
+            PlayerSubject.Interacted -= OnInteract;
             PlayerSubject.Thrown -= OnThrow;
         }
     }

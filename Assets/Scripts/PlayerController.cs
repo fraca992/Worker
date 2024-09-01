@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     private float throwTime = 0f;
     private float maxThrowTime = 2f; // hardcoding 1s max throw time
     public GameObject pickedItem = null;
-    public event Action<Transform> PickedUp;
+    public event Action<InteractInformation> Interacted;
     public event Action<ThrowInformation> Thrown;
     [SerializeField] private Slider throwSlider;
     public bool isInteracting = false;
@@ -166,13 +166,10 @@ public class PlayerController : MonoBehaviour
         bool hasInteracted = false;
         if (interactKey && Physics.Raycast(interactRay, out hit, interactDistance, layerMask, QueryTriggerInteraction.Ignore))
         {
-            if (pickedItem == null && hit.collider.gameObject.tag == "Pickup") //TODO: add other interactions with E key here, also is this IF needed?
+            if (pickedItem == null && hit.collider.gameObject.tag == "Interactable")
             {
-                PickupInteraction(tGrabber);
-            }
-            else if (hit.collider.gameObject.tag == "Interactable")
-            {
-                PickupInteraction(tGrabber);
+                InteractInformation info = new InteractInformation(tGrabber,hit.transform);
+                BaseInteraction(info);
             }
 
             hasInteracted = true;
@@ -180,9 +177,9 @@ public class PlayerController : MonoBehaviour
         return hasInteracted;
     }
 
-    public void PickupInteraction(Transform grabPoint)
+    public void BaseInteraction(InteractInformation interactInfo)
     {
-        PickedUp?.Invoke(grabPoint);
+        Interacted?.Invoke(interactInfo);
     }
 
     public void ThrowInteraction(ThrowInformation throwInfo)

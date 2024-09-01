@@ -16,8 +16,20 @@ public static class Commons
         public Vector3 direction;
     }
 
+    public struct InteractInformation
+    {
+        public InteractInformation(Transform g, Transform i)
+        {
+            grabberTransform = g;
+            interactableTransform = i;
+        }
+
+        public Transform grabberTransform;
+        public Transform interactableTransform;
+    }
+
     public interface IInteractable
     {
-        public void OnInteract(Transform playerGrabber);
+        public void OnInteract(InteractInformation info);
     }
 }
