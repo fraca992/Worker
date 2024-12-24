@@ -13,7 +13,7 @@ public class PickupObserver : MonoBehaviour, IInteractable
     private Transform t;
     private Transform grabberTransform = null;
     private bool isPicked = false;
-    private FixedJoint joint;
+    private ConfigurableJoint joint;
 
     #region Pickup Lerp properties
     float lerpDuration = 0.5f;
@@ -41,14 +41,17 @@ public class PickupObserver : MonoBehaviour, IInteractable
     {
         if (!isPicked) return;
 
-        joint.connectedAnchor = grabberTransform.localPosition;
+        // Smoothly move the joint to follow the grabber point
+        joint.targetPosition = rb.transform.InverseTransformPoint(grabberTransform.position);
+        //rb.velocity = (grabberTransform.position - rb.position) * 10f;
+        //rb.rotation = grabberTransform.rotation;
 
-        float grabberDistance = (grabberTransform.position - rb.position).magnitude;
-        if (grabberDistance >= maxGrabberDistance)
-        {
-            ThrowInformation dropThrow = new ThrowInformation(0f,Vector3.zero);
-            OnThrow(dropThrow);
-        }
+        //float grabberDistance = (grabberTransform.position - rb.position).magnitude;
+        //if (grabberDistance >= maxGrabberDistance)
+        //{
+        //    ThrowInformation dropThrow = new ThrowInformation(0f,Vector3.zero);
+        //    OnThrow(dropThrow);
+        //}
     }
 
     public void OnInteract(InteractInformation info)
@@ -88,12 +91,20 @@ public class PickupObserver : MonoBehaviour, IInteractable
         rb.isKinematic = false;
         rb.freezeRotation = true;
 
-        joint = this.AddComponent<FixedJoint>();
-        joint.anchor = Vector3.zero;
-        joint.connectedBody = grabberTransform.GetComponentInParent<Rigidbody>();
+        joint = this.AddComponent<ConfigurableJoint>();
+        joint.connectedBody = null; // No rigidbody connection, free-floating
+
+        // Joint Settings
+        joint.xMotion = ConfigurableJointMotion.Locked;
+        joint.yMotion = ConfigurableJointMotion.Locked;
+        joint.zMotion = ConfigurableJointMotion.Locked;
+
+        joint.angularXMotion = ConfigurableJointMotion.Free;
+        joint.angularYMotion = ConfigurableJointMotion.Free;
+        joint.angularZMotion = ConfigurableJointMotion.Free;
+
+        joint.anchor = Vector3.zero; // Default anchor
         joint.autoConfigureConnectedAnchor = false;
-        joint.connectedAnchor = grabberTransform.localPosition;
-        joint.massScale = 1000; //to not make the player move along the picked object, test different values!
 
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
         yield return null;
