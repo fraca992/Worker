@@ -119,6 +119,7 @@ public class PlayerController : MonoBehaviour
         float horizontalMovement = Input.GetAxisRaw("Horizontal"); // using raw input to make movement snappier
         float verticalMovement = Input.GetAxisRaw("Vertical");
         MovePlayer(horizontalMovement, verticalMovement);
+
     }
 
     private void UpdateDirection(float mouseX, float mouseY)
@@ -143,6 +144,8 @@ public class PlayerController : MonoBehaviour
         movement *= movementSpeed * Time.fixedDeltaTime;
         movement.y = rbPlayer.velocity.y; // As we're manipulating speed directly, take care not changing vertical speed
         rbPlayer.AddForce(movement - rbPlayer.velocity,ForceMode.VelocityChange);
+
+
     }
 
     private void MoveGrabber()

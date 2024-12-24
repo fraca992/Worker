@@ -20,6 +20,7 @@ public class PlayerCameraController : MonoBehaviour
     private void MoveCamera()
     {
         Vector3 newPosition = tCameraDirection.position;
+        //Vector3 newPosition = tPlayer.position;
         transform.position = newPosition;
         transform.rotation = tCameraDirection.rotation;
     }
