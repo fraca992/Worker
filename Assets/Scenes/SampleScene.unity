@@ -1364,6 +1364,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tPlayer: {fileID: 1208686799}
+  positionSmoothSpeed: 55
+  rotationSmoothSpeed: 50
 --- !u!224 &1776310422 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6168110880350018068, guid: 6db9a4692c491ff42a37a24cbce1bc12, type: 3}
@@ -1437,9 +1439,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!135 &1803048904
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1540,6 +1542,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerSubject: {fileID: 1208686797}
   maxGrabberDistance: 1
+  positionSmoothSpeed: 10
+  rotationSmoothSpeed: 10
 --- !u!1 &1957040753
 GameObject:
   m_ObjectHideFlags: 0

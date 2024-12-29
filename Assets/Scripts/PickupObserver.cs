@@ -8,12 +8,14 @@ public class PickupObserver : MonoBehaviour, IInteractable
     [Header("Observer")]
     [SerializeField] PlayerController PlayerSubject;
     [SerializeField] float maxGrabberDistance = 1f;
+    [SerializeField] float positionSmoothSpeed = 10f; // Smooth speed for position
+    [SerializeField] float rotationSmoothSpeed = 10f; // Smooth speed for rotation
 
     private Rigidbody rb;
     private Transform t;
     private Transform grabberTransform = null;
     private bool isPicked = false;
-    private ConfigurableJoint joint;
+
 
     #region Pickup Lerp properties
     float lerpDuration = 0.5f;
@@ -41,17 +43,30 @@ public class PickupObserver : MonoBehaviour, IInteractable
     {
         if (!isPicked) return;
 
-        // Smoothly move the joint to follow the grabber point
-        joint.targetPosition = rb.transform.InverseTransformPoint(grabberTransform.position);
-        //rb.velocity = (grabberTransform.position - rb.position) * 10f;
-        //rb.rotation = grabberTransform.rotation;
+        // Smooth position update
+        Vector3 targetPosition = grabberTransform.position;
+        Vector3 currentPosition = rb.position;
+        Vector3 newPosition = Vector3.Lerp(currentPosition, targetPosition, positionSmoothSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(newPosition);
 
-        //float grabberDistance = (grabberTransform.position - rb.position).magnitude;
-        //if (grabberDistance >= maxGrabberDistance)
-        //{
-        //    ThrowInformation dropThrow = new ThrowInformation(0f,Vector3.zero);
-        //    OnThrow(dropThrow);
-        //}
+        // Smooth rotation update
+        Quaternion targetRotation = grabberTransform.rotation;
+        Quaternion currentRotation = rb.rotation;
+        Quaternion newRotation = Quaternion.Slerp(currentRotation, targetRotation, rotationSmoothSpeed * Time.fixedDeltaTime);
+        rb.MoveRotation(newRotation);
+
+
+        // Ensure no unwanted drift
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        float grabberDistance = (grabberTransform.position - rb.position).magnitude;
+        if (grabberDistance >= maxGrabberDistance)
+        {
+            ThrowInformation dropThrow = new ThrowInformation(0f, Vector3.zero);
+            OnThrow(dropThrow);
+        }
+
     }
 
     public void OnInteract(InteractInformation info)
@@ -66,12 +81,14 @@ public class PickupObserver : MonoBehaviour, IInteractable
         rb.angularVelocity = Vector3.zero;
         rb.isKinematic = true;
         rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         lerpStart = transform;
         StartCoroutine(PickUpLerp());
         
     }
-    IEnumerator PickUpLerp()
+    IEnumerator PickUpLerp() // CONSIDER USING MOVEPOSITION INSTEAD OF COROUTINE
     {
         float timeElapsed = 0;
 
@@ -90,23 +107,8 @@ public class PickupObserver : MonoBehaviour, IInteractable
         isPicked = true;
         rb.isKinematic = false;
         rb.freezeRotation = true;
-
-        joint = this.AddComponent<ConfigurableJoint>();
-        joint.connectedBody = null; // No rigidbody connection, free-floating
-
-        // Joint Settings
-        joint.xMotion = ConfigurableJointMotion.Locked;
-        joint.yMotion = ConfigurableJointMotion.Locked;
-        joint.zMotion = ConfigurableJointMotion.Locked;
-
-        joint.angularXMotion = ConfigurableJointMotion.Free;
-        joint.angularYMotion = ConfigurableJointMotion.Free;
-        joint.angularZMotion = ConfigurableJointMotion.Free;
-
-        joint.anchor = Vector3.zero; // Default anchor
-        joint.autoConfigureConnectedAnchor = false;
-
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
+
         yield return null;
     }
 
@@ -117,7 +119,8 @@ public class PickupObserver : MonoBehaviour, IInteractable
         rb.isKinematic = false;
         rb.freezeRotation = false;
         rb.useGravity = true;
-        Object.Destroy(joint);
+        rb.interpolation = RigidbodyInterpolation.None;
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
 
         Debug.DrawLine(grabberTransform.position, grabberTransform.position + (ti.direction * ti.force), Color.red, 5f);
         rb.AddForce(ti.force * ti.direction,ForceMode.Impulse);
