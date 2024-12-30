@@ -5,16 +5,14 @@ using UnityEngine;
 public class DebugCameraController : MonoBehaviour
 {
     private Camera debugCamera;
-    [SerializeField]
-    private Camera playerCamera;
+    [SerializeField] private Camera playerCamera;
     private enum Option
     {
         Disabled,
         SplitScreen,
         OnlyDebugCamera
     }
-    [SerializeField]
-    private Option DebugOptions;
+    [SerializeField] private Option DebugOptions;
 
     
 

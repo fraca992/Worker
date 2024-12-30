@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 364099253}
   - component: {fileID: 364099252}
   m_Layer: 0
-  m_Name: Cube (1)
+  m_Name: Step 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -246,7 +246,7 @@ GameObject:
   - component: {fileID: 402257652}
   - component: {fileID: 402257651}
   m_Layer: 0
-  m_Name: Cube (3)
+  m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 402494250}
   - component: {fileID: 402494249}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: Step 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -539,7 +539,7 @@ GameObject:
   - component: {fileID: 687639980}
   - component: {fileID: 687639979}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Step 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1542,8 +1542,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerSubject: {fileID: 1208686797}
   maxGrabberDistance: 1
-  positionSmoothSpeed: 10
-  rotationSmoothSpeed: 10
 --- !u!1 &1957040753
 GameObject:
   m_ObjectHideFlags: 0
@@ -1662,7 +1660,7 @@ GameObject:
   - component: {fileID: 1982430070}
   - component: {fileID: 1982430069}
   m_Layer: 0
-  m_Name: Cube (4)
+  m_Name: Ramp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1860,13 +1858,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 154113519496415257, guid: b79b99df9b194d945ad1d1e09abc68ef, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.75
-      objectReference: {fileID: 0}
     - target: {fileID: 5108988352381130022, guid: b79b99df9b194d945ad1d1e09abc68ef, type: 3}
-      propertyPath: OpeningSpeed
-      value: 150
+      propertyPath: openingTime
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5108988352381130022, guid: b79b99df9b194d945ad1d1e09abc68ef, type: 3}
       propertyPath: PlayerSubject
@@ -2067,5 +2061,5 @@ SceneRoots:
   - {fileID: 1991139893}
   - {fileID: 1252494822}
   - {fileID: 1507440550}
-  - {fileID: 579146284472312458}
   - {fileID: 1505941367}
+  - {fileID: 579146284472312458}

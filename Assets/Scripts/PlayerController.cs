@@ -7,7 +7,6 @@ using UnityEditor;
 using System.Runtime.CompilerServices;
 using static Commons;
 using UnityEngine.UI;
-//using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
 {
@@ -91,7 +90,7 @@ public class PlayerController : MonoBehaviour
         bool isInteractKeyDown = Input.GetKeyDown(KeyCode.E); // TODO: eventually make it changeable
         InteractWithObject(isInteractKeyDown && !isInteracting);
 
-        // throw object
+        // throw object //TODO: only if InteractWithObject has returned false!
         if (pickedItem != null && !isInteracting)
         {
             bool isThrowing = (Input.GetKey(KeyCode.E));

@@ -1,71 +1,88 @@
+using System.Collections;
+using System.Runtime.CompilerServices;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static Commons;
 
 public class DoorObserver : MonoBehaviour, IInteractable
 {
-    [Header("Observer")]
     [SerializeField] PlayerController PlayerSubject;
-    [SerializeField] float OpeningSpeed = 50f;
+    [SerializeField] float openingTime = 1f;
+    [SerializeField] float openingAngle = 95f;
 
-    Rigidbody rb;
     Transform grabberTransform;
-
+    Vector3 closedRotation;
     bool hasActivated = false;
-    private Vector3 doorRotationSpeed = Vector3.zero;
+    bool isOpen = false;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.constraints = RigidbodyConstraints.FreezeAll;
-        rb.useGravity = false;
-        doorRotationSpeed.y = OpeningSpeed;
-
         // Subscribe to Subject
         if (PlayerSubject != null)
         {
-            PlayerSubject.Interacted += OnInteract; // TODO: should be its own interact
+            PlayerSubject.Interacted += OnInteract;
         }
 
-        
+        closedRotation = transform.rotation.eulerAngles;
+        // ensuring the Renderer & Collider (Child 0) is in the correct offset
+        Transform rendererTransform = transform.GetChild(0);
+        rendererTransform.localPosition = new Vector3(rendererTransform.GetComponent<MeshRenderer>().bounds.size.x/2, 0f, 0f);
     }
 
-    void FixedUpdate()
-    {
-        // rotate Door if it was activated
-        if (hasActivated && rb.rotation.eulerAngles.y < 95 )
-        {
-            Quaternion deltaRotation = Quaternion.Euler(doorRotationSpeed * Time.fixedDeltaTime);
-            rb.MoveRotation(rb.rotation * deltaRotation);
-        }
-        else if (hasActivated && !(rb.rotation.eulerAngles.y < 95))
-        {
-            // once the door has finished opening, clear activated flag and freeze all
-            rb.constraints = RigidbodyConstraints.FreezeAll;
-            hasActivated = false;
-            grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
-        }
-
-        //TODO: this only works opening the door! should also close. also, open away from player
-    }
-
-    // When interacted, the Door object will prepare for the rotation implemented in FixedUpdate()
     public void OnInteract(InteractInformation info)
     {
-        if (hasActivated || info.interactableTransform != transform) return;
-
+        if (hasActivated || info.interactableTransform.parent != transform) return;
+        
+        // getting grabber info and setting interaction flags
         grabberTransform = info.grabberTransform;
         grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
-
         hasActivated = true;
 
-        // clear constraints, then freeze all rotation except on Y axis (hinges)
-        rb.constraints = RigidbodyConstraints.None;
-        rb.constraints = RigidbodyConstraints.FreezePosition;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX;
-        rb.constraints = RigidbodyConstraints.FreezeRotationZ;
+        // setting the target location depending on isOpen and player position, then start open door coroutine
+        Vector3 targetRotation;
+        float playerDoorDot = Vector3.Dot((transform.position - grabberTransform.parent.position).normalized, transform.forward);
+
+        if (isOpen)
+        {
+            targetRotation = closedRotation;
+        }
+        else if (playerDoorDot > 0f)
+        {
+            targetRotation = new Vector3(transform.rotation.x, transform.rotation.y - openingAngle, transform.rotation.z);
+        }
+        else
+        {
+            targetRotation = new Vector3(transform.rotation.x, transform.rotation.y + openingAngle, transform.rotation.z);
+        }
+
+        isOpen = !isOpen;
+        Quaternion lerpStart = transform.rotation;
+        StartCoroutine(OpenDoor(targetRotation, lerpStart));
     }
 
+    // Coroutine which opens the door using a Slerp interpolation over openingTime
+    IEnumerator OpenDoor(Vector3 targetRotation, Quaternion lerpStart)
+    {
+        float timeElapsed = 0;
+
+        while (timeElapsed < openingTime)
+        {
+            Quaternion interpolatedRotation = Quaternion.Slerp(lerpStart, Quaternion.Euler(targetRotation), timeElapsed / openingTime);
+            transform.rotation = interpolatedRotation;
+
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.rotation = Quaternion.Euler(targetRotation);
+
+        // reset flags
+        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
+        hasActivated = false;
+        yield return null;
+    }
+
+    // when destroyed, unsubscribe from subject
     private void OnDestroy()
     {
         if (PlayerSubject != null)

@@ -3,37 +3,37 @@ using UnityEngine.UI;
 
 public class ThrowBarManager : MonoBehaviour
 {
-    private Slider ThrowSlider;
-    private Image bkgImage;
-    private Image fllImage;
+    private Slider throwSlider;
+    private Image backgroundImage;
+    private Image fillImage;
 
     private void Awake()
     {
-        ThrowSlider = this.GetComponent<Slider>();
-        bkgImage = this.transform.Find("Background").GetComponent<Image>();
-        fllImage = this.transform.Find("Fill").GetComponent<Image>();
+        throwSlider = this.GetComponent<Slider>();
+        backgroundImage = this.transform.Find("Background").GetComponent<Image>();
+        fillImage = this.transform.Find("Fill").GetComponent<Image>();
 
-        bkgImage.enabled = false;
-        fllImage.enabled = false;
-        ThrowSlider.value = 0f;
+        backgroundImage.enabled = false;
+        fillImage.enabled = false;
+        throwSlider.value = 0f;
     }
 
     private void Update()
     {
-        if (ThrowSlider.value != 0)
+        if (throwSlider.value != 0)
         {
-            bkgImage.enabled = true;
-            fllImage.enabled = true;
+            backgroundImage.enabled = true;
+            fillImage.enabled = true;
         }
         else
         {
-            bkgImage.enabled = false;
-            fllImage.enabled = false;
+            backgroundImage.enabled = false;
+            fillImage.enabled = false;
         }
     }
 
     public void SetValuePercentage(float percentage)
     {
-        ThrowSlider.value = Mathf.Clamp(percentage,0,1);
+        throwSlider.value = Mathf.Clamp(percentage,0,1);
     }
 }

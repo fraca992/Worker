@@ -3,14 +3,13 @@ using UnityEngine;
 public class PlayerCameraController : MonoBehaviour
 {
     [SerializeField] private Transform tPlayer;
-    private Transform tCameraDirection;
-
-    private Vector3 smoothedPosition;
-    private Quaternion smoothedRotation;
-
-    [Header("Camera Smoothing")]
+    [Header("Camera Movement")]
     [SerializeField] private float positionSmoothSpeed = 15f;
     [SerializeField] private float rotationSmoothSpeed = 10f;
+    
+    private Transform tCameraDirection;
+    private Vector3 smoothedPosition;
+    private Quaternion smoothedRotation;
 
     void Start()
     {
@@ -22,11 +21,6 @@ public class PlayerCameraController : MonoBehaviour
     }
 
     void LateUpdate()
-    {
-        MoveCamera();
-    }
-
-    private void MoveCamera()
     {
         // Smoothly follow the camera direction
         smoothedPosition = Vector3.Lerp(smoothedPosition, tCameraDirection.position, positionSmoothSpeed * Time.deltaTime);
