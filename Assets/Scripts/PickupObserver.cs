@@ -8,8 +8,6 @@ public class PickupObserver : MonoBehaviour, IInteractable
     [Header("Observer")]
     [SerializeField] PlayerController PlayerSubject;
     [SerializeField] float maxGrabberDistance = 1f;
-    [SerializeField] float positionSmoothSpeed = 10f; // Smooth speed for position
-    [SerializeField] float rotationSmoothSpeed = 10f; // Smooth speed for rotation
 
     private Rigidbody rb;
     private Transform t;
@@ -43,22 +41,19 @@ public class PickupObserver : MonoBehaviour, IInteractable
     {
         if (!isPicked) return;
 
-        // Smooth position update
-        Vector3 targetPosition = grabberTransform.position;
-        Vector3 currentPosition = rb.position;
-        Vector3 newPosition = Vector3.Lerp(currentPosition, targetPosition, positionSmoothSpeed * Time.fixedDeltaTime);
-        rb.MovePosition(newPosition);
+        Vector3 endPoint = grabberTransform.position;
+        Vector3 startPoint = rb.position; // or transform?
+        Vector3 cursorVector = endPoint - startPoint;
+        Vector3 cursorVectorDirection = cursorVector.normalized;
+        float cursorVectorMagnitude = cursorVector.magnitude;
 
-        // Smooth rotation update
-        Quaternion targetRotation = grabberTransform.rotation;
-        Quaternion currentRotation = rb.rotation;
-        Quaternion newRotation = Quaternion.Slerp(currentRotation, targetRotation, rotationSmoothSpeed * Time.fixedDeltaTime);
-        rb.MoveRotation(newRotation);
+        float forceMagnitude = 500f;
+        Vector3 force = forceMagnitude * (Mathf.Exp(cursorVectorMagnitude) - 1) * cursorVectorDirection;
+        float dampenMagnitude = rb.mass * (Mathf.Pow(rb.velocity.magnitude, 2) / (2 * 0.001f));
+        Vector3 dampenerForce = dampenMagnitude * Mathf.Exp(-cursorVectorMagnitude) * -cursorVectorDirection;
 
-
-        // Ensure no unwanted drift
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        rb.AddForce(force, ForceMode.Force);
+        rb.AddForce(-Mathf.Exp(-cursorVectorMagnitude) * rb.velocity, ForceMode.VelocityChange);
 
         float grabberDistance = (grabberTransform.position - rb.position).magnitude;
         if (grabberDistance >= maxGrabberDistance)
