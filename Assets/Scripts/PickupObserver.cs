@@ -1,131 +1,114 @@
 using System.Collections;
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 using static Commons;
 
 public class PickupObserver : MonoBehaviour, IInteractable
 {
-    [Header("Observer")]
-    [SerializeField] PlayerController PlayerSubject;
-    [SerializeField] float maxGrabberDistance = 1f;
+    [SerializeField] private PlayerController PlayerSubject;
+    [SerializeField] private float maxGrabberDistance = 1f;
+    [SerializeField] private float grabberForce = 500f;
 
     private Rigidbody rb;
-    private Transform t;
     private Transform grabberTransform = null;
-    private bool isPicked = false;
-
-
-    #region Pickup Lerp properties
-    float lerpDuration = 0.5f;
-    Transform lerpStart;
-    Vector3 interpolatedPosition;
-    Vector3 interpolatedRotation;
-    #endregion
-
+    private bool isHeld = false;
+    private bool isBeingPickedUp = false;
 
     void Start()
     {
-        // Get References
-        rb = GetComponent<Rigidbody>();
-        t = GetComponent<Transform>();
-
         // Subscribe to Subject
         if (PlayerSubject != null)
         {
             PlayerSubject.Interacted += OnInteract;
             PlayerSubject.Thrown += OnThrow;
         }
+
+        // Get References
+        rb = GetComponent<Rigidbody>();
     }
 
     private void FixedUpdate()
     {
-        if (!isPicked) return;
+        if (!isHeld && !isBeingPickedUp) return;
 
-        Vector3 endPoint = grabberTransform.position;
-        Vector3 startPoint = rb.position; // or transform?
-        Vector3 cursorVector = endPoint - startPoint;
-        Vector3 cursorVectorDirection = cursorVector.normalized;
-        float cursorVectorMagnitude = cursorVector.magnitude;
+        // vector from this item and the player grabber
+        Vector3 vectorToGrabber = grabberTransform.position - rb.position;
+        Vector3 directionToGrabber = vectorToGrabber.normalized;
+        float distanceFromGrabber = vectorToGrabber.magnitude;
 
-        float forceMagnitude = 500f;
-        Vector3 force = forceMagnitude * (Mathf.Exp(cursorVectorMagnitude) - 1) * cursorVectorDirection;
-        float dampenMagnitude = rb.mass * (Mathf.Pow(rb.velocity.magnitude, 2) / (2 * 0.001f));
-        Vector3 dampenerForce = dampenMagnitude * Mathf.Exp(-cursorVectorMagnitude) * -cursorVectorDirection;
-
+        // calculating the total force to move te item towards the grabber as a custom spring/dampener system:
+        //// uses an exponential force (the -1 is so that when the distance is 0, force is 0)
+        //// combined to a dampener force (in the form of a Velocity change) computed as a decaying exponential
+        Vector3 force = grabberForce * (Mathf.Exp(distanceFromGrabber) - 1) * directionToGrabber;
+        Vector3 dampeningSpeed = -Mathf.Exp(-distanceFromGrabber) * rb.velocity;
         rb.AddForce(force, ForceMode.Force);
-        rb.AddForce(-Mathf.Exp(-cursorVectorMagnitude) * rb.velocity, ForceMode.VelocityChange);
+        rb.AddForce(dampeningSpeed, ForceMode.VelocityChange);
 
+        // if the item is too far from the grabber, drop it
         float grabberDistance = (grabberTransform.position - rb.position).magnitude;
-        if (grabberDistance >= maxGrabberDistance)
+        if (!isBeingPickedUp && grabberDistance >= maxGrabberDistance)
         {
             ThrowInformation dropThrow = new ThrowInformation(0f, Vector3.zero);
             OnThrow(dropThrow);
         }
-
     }
 
+    // triggered when Subject invokes the Interact method
     public void OnInteract(InteractInformation info)
     {
-        if (isPicked || info.interactableTransform != transform) return;
+        // returns if it's not interacting with this object, or if it alrady has been pickedup
+        if (isHeld || info.interactableTransform != transform) return;
 
+        // getting grabber info and setting interaction flags
         grabberTransform = info.grabberTransform;
         grabberTransform.GetComponentInParent<PlayerController>().pickedItem = this.gameObject;
-        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
+        isBeingPickedUp = true;
+        this.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 
+        // RigidBody settings for pickup
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = true;
         rb.useGravity = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
-        lerpStart = transform;
-        StartCoroutine(PickUpLerp());
-        
+        StartCoroutine(PickupFlag());
     }
-    IEnumerator PickUpLerp() // CONSIDER USING MOVEPOSITION INSTEAD OF COROUTINE
+
+    IEnumerator PickupFlag()
     {
-        float timeElapsed = 0;
+        //yield return new WaitForSeconds(Time.deltaTime);//
 
-        while (timeElapsed < lerpDuration)
+        while ((grabberTransform.position - rb.position).magnitude > maxGrabberDistance/2)
         {
-            interpolatedPosition = Vector3.Lerp(lerpStart.position, grabberTransform.position, timeElapsed / lerpDuration);
-            interpolatedRotation = Vector3.Lerp(lerpStart.rotation.eulerAngles, grabberTransform.rotation.eulerAngles, timeElapsed / lerpDuration);
-            t.position = interpolatedPosition;
-            t.rotation = Quaternion.Euler(interpolatedRotation);
-
-            timeElapsed += Time.deltaTime;
             yield return null;
         }
-        t.position = grabberTransform.position;
-        t.rotation = grabberTransform.rotation;
-        isPicked = true;
-        rb.isKinematic = false;
-        rb.freezeRotation = true;
-        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
 
+        // resetting interaction flags once it's close enough to not trigger the drop
+        isBeingPickedUp = false;
+        isHeld = true;
         yield return null;
     }
 
+    // triggered when Subject invokes the Thrown method
     public void OnThrow(ThrowInformation ti)
     {
-        //TODO: Implement throw logic
-        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
-        rb.isKinematic = false;
-        rb.freezeRotation = false;
+        // setting interaction flags and Rigidbody settings for throw
         rb.useGravity = true;
         rb.interpolation = RigidbodyInterpolation.None;
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
 
-        Debug.DrawLine(grabberTransform.position, grabberTransform.position + (ti.direction * ti.force), Color.red, 5f);
+        // trhow
         rb.AddForce(ti.force * ti.direction,ForceMode.Impulse);
 
-        isPicked = false;
+        // reset interaction flags
+        isHeld = false;
         grabberTransform.GetComponentInParent<PlayerController>().pickedItem = null;
-        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
+        this.gameObject.layer = LayerMask.NameToLayer("Interactable Objects");
         grabberTransform = null;
     }
 
+    // ignoring collisions with the Player
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Player")
@@ -134,6 +117,7 @@ public class PickupObserver : MonoBehaviour, IInteractable
         }
     }
 
+    // when destroyed, unsubscribe from subject
     private void OnDestroy()
     {
         if (PlayerSubject != null)

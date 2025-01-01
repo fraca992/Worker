@@ -1,20 +1,18 @@
 using System.Collections;
-using System.Runtime.CompilerServices;
-using Unity.VisualScripting.Antlr3.Runtime;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static Commons;
 
 public class DoorObserver : MonoBehaviour, IInteractable
 {
-    [SerializeField] PlayerController PlayerSubject;
-    [SerializeField] float openingTime = 1f;
-    [SerializeField] float openingAngle = 95f;
+    [SerializeField] private PlayerController PlayerSubject;
+    [SerializeField] private float openingTime = 0.5f;
+    [SerializeField] private float openingAngle = 95f;
 
-    Transform grabberTransform;
-    Vector3 closedRotation;
-    bool hasActivated = false;
-    bool isOpen = false;
+    private Transform grabberTransform;
+    private Vector3 closedRotation;
+    private bool hasActivated = false;
+    private bool isOpen = false;
 
     void Start()
     {
@@ -24,19 +22,22 @@ public class DoorObserver : MonoBehaviour, IInteractable
             PlayerSubject.Interacted += OnInteract;
         }
 
-        closedRotation = transform.rotation.eulerAngles;
-        // ensuring the Renderer & Collider (Child 0) is in the correct offset
+        // Get references
         Transform rendererTransform = transform.GetChild(0);
+
+        // Initializing values
+        closedRotation = transform.rotation.eulerAngles;
         rendererTransform.localPosition = new Vector3(rendererTransform.GetComponent<MeshRenderer>().bounds.size.x/2, 0f, 0f);
     }
 
+    // triggered when Subject invokes the Interacted method
     public void OnInteract(InteractInformation info)
     {
+        // returns if it's not interacting with this object, or if it alrady has activated
         if (hasActivated || info.interactableTransform.parent != transform) return;
         
         // getting grabber info and setting interaction flags
         grabberTransform = info.grabberTransform;
-        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = true;
         hasActivated = true;
 
         // setting the target location depending on isOpen and player position, then start open door coroutine
@@ -76,8 +77,7 @@ public class DoorObserver : MonoBehaviour, IInteractable
         }
         transform.rotation = Quaternion.Euler(targetRotation);
 
-        // reset flags
-        grabberTransform.GetComponentInParent<PlayerController>().isInteracting = false;
+        // reset interaction flags
         hasActivated = false;
         yield return null;
     }

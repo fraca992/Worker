@@ -1,11 +1,13 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerCameraController : MonoBehaviour
 {
     [SerializeField] private Transform tPlayer;
     [Header("Camera Movement")]
-    [SerializeField] private float positionSmoothSpeed = 15f;
-    [SerializeField] private float rotationSmoothSpeed = 10f;
+    [SerializeField] private float positionSmoothSpeed = 55f;
+    [SerializeField] private float rotationSmoothSpeed = 50f;
     
     private Transform tCameraDirection;
     private Vector3 smoothedPosition;
